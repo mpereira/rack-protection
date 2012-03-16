@@ -16,12 +16,12 @@ module Rack
       def call(env)
         status, headers, body = app.call(env)
         http_access_control_allow_origin = headers['Access-Control-Allow-Origin']
-        http_origin = headers['Origin']
-        origin_allowed = false
-        if http_access_control_allow_origin
-          if http_access_control_allow_origin == '*' ||
-               URI(allow_origin).host == http_origin
-            origin_allowed = true
+        http_origin = env['HTTP_ORIGIN']
+        origin_allowed = true
+        if http_origin && http_access_control_allow_origin
+          if http_access_control_allow_origin != '*' &&
+               URI(http_access_control_allow_origin).host != URI(http_origin).host
+            origin_allowed = false
           end
         end
         if http_origin != Request.new(env).host && !origin_allowed
